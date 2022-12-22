@@ -79,6 +79,7 @@ function Attachment({
   name,
   size,
   partName,
+  url,
   id,
 }) {
   let [displayMenu, setDisplayMenu] = React.useState(false);
@@ -288,6 +289,7 @@ Attachment.propTypes = {
   name: PropTypes.string.isRequired,
   size: PropTypes.number.isRequired,
   partName: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
   id: PropTypes.number.isRequired,
 };
 
@@ -354,6 +356,7 @@ export class Attachments extends React.PureComponent {
             name={attachment.name}
             partName={attachment.partName}
             size={attachment.size}
+            url={attachment.url}
           />
         ))}
       </ul>
