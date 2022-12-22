@@ -94,32 +94,31 @@ function Attachment({
     );
   }
 
-  // TODO: Fix drag n drop of attachments.
-  // onDragStart(event) {
-  //   let info;
-  //   if (/(^file:|&filename=)/.test(this.props.url)) {
-  //     info = this.props.url;
-  //   } else {
-  //     info =
-  //       this.props.url +
-  //       "&type=" +
-  //       this.props.contentType +
-  //       "&filename=" +
-  //       encodeURIComponent(this.props.name);
-  //   }
-  //   event.dataTransfer.setData(
-  //     "text/x-moz-url",
-  //     `${info}\n${this.props.name}\n${this.props.size}`
-  //   );
-  //   event.dataTransfer.setData("text/x-moz-url-data", this.props.url);
-  //   event.dataTransfer.setData("text/x-moz-url-desc", this.props.name);
-  //   event.dataTransfer.setData(
-  //     "application/x-moz-file-promise-url",
-  //     this.props.url
-  //   );
-  //   event.dataTransfer.setData("application/x-moz-file-promise", null);
-  //   event.stopPropagation();
-  // }
+  function onDragStart(event) {
+    let info;
+    if (/(^file:|&filename=)/.test(url)) {
+      info = url;
+    } else {
+      info =
+        url +
+        "&type=" +
+        contentType +
+        "&filename=" +
+        encodeURIComponent(name);
+    }
+    event.dataTransfer.setData(
+      "text/x-moz-url",
+      `${info}\n${name}\n${size}`
+    );
+    event.dataTransfer.setData("text/x-moz-url-data", url);
+    event.dataTransfer.setData("text/x-moz-url-desc", name);
+    event.dataTransfer.setData(
+      "application/x-moz-file-promise-url",
+      url
+    );
+    event.dataTransfer.setData("application/x-moz-file-promise", null);
+    event.stopPropagation();
+  }
 
   function downloadAttachment() {
     dispatch(
@@ -222,16 +221,15 @@ function Attachment({
     }
   }, [id, contentType, partName]);
 
-  // TODO: Drag n drop
-  // onDragStart={this.onDragStart}
   return (
     <li className="attachment">
       <div
         className="attachmentThumb"
-        draggable="false"
+        draggable="true"
         onClick={isImage ? preview : openAttachment}
+        onDragStart={onDragStart}
       >
-        <img className={imgClass} src={thumb} title={imgTitle} />
+        <img draggable="false" className={imgClass} src={thumb} title={imgTitle} />
       </div>
       <div className="attachmentInfo align">
         <span className="filename">{name}</span>
