@@ -6,11 +6,10 @@
 
 XPCOMUtils.defineLazyModuleGetters(this, {
   Gloda: "resource:///modules/gloda/Gloda.jsm",
+  GlodaConstants: "resource:///modules/gloda/GlodaConstants.jsm",
+  GlodaSyntheticView: "resource:///modules/gloda/GlodaSyntheticView.jsm",
   MailServices: "resource:///modules/MailServices.jsm",
 });
-
-// eslint-disable-next-line mozilla/reject-importGlobalProperties
-XPCOMUtils.defineLazyGlobalGetters(this, ["btoa", "IOUtils", "PathUtils"]);
 
 /**
  * @typedef nsIMsgFolder
@@ -31,7 +30,7 @@ function getQuery(
     involvesItems: null,
   }
 ) {
-  const q = Gloda.newQuery(Gloda[options.query]);
+  const q = Gloda.newQuery(GlodaConstants[options.query]);
   if (options.kind != null) {
     q.kind(options.kind);
   }
@@ -90,29 +89,6 @@ var convContacts = class extends ExtensionCommon.ExtensionAPI {
             beginNewProperties.windowId
           );
 
-          // Proxy for > Thunderbird 101.
-          if ("AskUser" in Ci.nsIMsgCompSendFormat) {
-            const window = getWindowFromId(
-              windowManager,
-              context,
-              beginNewProperties.windowId
-            );
-            const args = {};
-            if (beginNewProperties.email !== null) {
-              args.primaryEmail = beginNewProperties.email;
-            }
-            if (beginNewProperties.displayName !== null) {
-              args.displayName = beginNewProperties.displayName;
-            }
-            window.openDialog(
-              "chrome://messenger/content/addressbook/abNewCardDialog.xhtml",
-              "",
-              "chrome,resizable=no,titlebar,modal,centerscreen",
-              args
-            );
-            return;
-          }
-
           window.toAddressBook({
             action: "create",
             vCard: `BEGIN:VCARD\r\nFN:${beginNewProperties.displayName}\r\nEMAIL:${beginNewProperties.email}\r\nEND:VCARD\r\n`,
@@ -132,57 +108,10 @@ var convContacts = class extends ExtensionCommon.ExtensionAPI {
             return;
           }
 
-          // Proxy for > Thunderbird 101.
-          if ("AskUser" in Ci.nsIMsgCompSendFormat) {
-            const args = {
-              abURI: MailServices.ab.getDirectoryFromUID(contact.directoryUID),
-              card: contact.item,
-            };
-            window.openDialog(
-              "chrome://messenger/content/addressbook/abEditCardDialog.xhtml",
-              "",
-              "chrome,modal,resizable=no,centerscreen",
-              args
-            );
-            return;
-          }
-
           window.toAddressBook({
             action: "edit",
             card: contact.item,
           });
-        },
-        async getPhotoUrl(contactId) {
-          let contact = addressBookManager.findContactById(contactId);
-          if (!contact) {
-            return null;
-          }
-
-          let photoName = contact.item.getProperty("PhotoName", "");
-          if (photoName) {
-            let path = PathUtils.join(
-              PathUtils.profileDir,
-              "Photos",
-              photoName
-            );
-
-            let buffer = await IOUtils.read(path);
-            let data = btoa(String.fromCharCode.apply(null, buffer));
-
-            let type;
-            if (data.startsWith("iVBO")) {
-              // The first 3 bytes say this image is PNG.
-              type = "png";
-            } else if (data.startsWith("/9j/")) {
-              // The first 3 bytes say this image is JPEG.
-              type = "jpeg";
-            } else {
-              throw new Error("Unsupported image format");
-            }
-            return `data:image/${type};base64,${data}`;
-          }
-
-          return null;
         },
         async showMessagesInvolving(options) {
           const window = getWindowFromId(
@@ -206,8 +135,9 @@ var convContacts = class extends ExtensionCommon.ExtensionAPI {
           });
 
           let tabmail = window.document.getElementById("tabmail");
-          tabmail.openTab("glodaList", {
-            query,
+          tabmail.openTab("mail3PaneTab", {
+            folderPaneVisible: false,
+            syntheticView: new GlodaSyntheticView({ query }),
             title: options.title,
             background: false,
           });

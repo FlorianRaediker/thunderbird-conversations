@@ -258,7 +258,8 @@ html[dir="rtl"] .tooltip {
   padding-inline-end: 0.5ch;
 }
 
-.dropDown, .attachmentsDropDown {
+.dropDown,
+.attachmentsDropDown {
   position: relative;
 }
 
@@ -321,7 +322,7 @@ html[dir="rtl"] .attachmentsDropDown .tooltip {
 }
 
 .dropDown li:nth-child(2n),
-.attachmentsDropDown li:nth-child(2n)  {
+.attachmentsDropDown li:nth-child(2n) {
   background-color: -moz-OddTreeRow;
 }
 
@@ -655,6 +656,10 @@ html[dir="rtl"] .attachmentsDropDown .arrow {
   justify-content: center;
   line-height: 0; /* Needed, otherwise there's an extra padding at the bottom... */
   cursor: pointer;
+}
+
+.attachmentThumb.deleted {
+  cursor: auto;
 }
 
 .attachmentThumb img {

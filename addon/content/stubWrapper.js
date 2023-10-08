@@ -4,12 +4,10 @@
 
 "use strict";
 
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 window.addEventListener(
   "load",
   function (event) {
-    let browser = document.getElementById("multimessage");
+    let browser = document.getElementById("multiMessageBrowser");
 
     browser.addEventListener(
       "load",
@@ -28,7 +26,9 @@ window.addEventListener(
     );
 
     browser.loadURI(
-      `chrome://conversations/content/stub.html${window.arguments[0].params}`,
+      Services.io.newURI(
+        `chrome://conversations/content/stub.html${window.arguments[0].params}`
+      ),
       {
         triggeringPrincipal:
           Services.scriptSecurityManager.getSystemPrincipal(),

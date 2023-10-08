@@ -306,7 +306,6 @@ export const messageActions = {
   notificationClick({ id, notificationType, extraData }) {
     return async (dispatch, getState) => {
       if (notificationType == "calendar") {
-        console.log(getState().summary.tabId, extraData.execute);
         await browser.convCalendar.onMessageNotification(
           getState().summary.tabId,
           extraData.execute
@@ -329,8 +328,8 @@ export const messageActions = {
     };
   },
   switchToFolderAndMsg({ id }) {
-    return async () => {
-      browser.conversations.switchToFolderAndMsg(id).catch(console.error);
+    return async (dispatch, getState) => {
+      browser.mailTabs.setSelectedMessages(getState().summary.tabId, [id]);
     };
   },
   sendUnsent() {
@@ -418,12 +417,12 @@ export const messageActions = {
     };
   },
   markAsJunk(action) {
-    return async (dispatch) => {
+    return async (dispatch, getState) => {
       // This action should only be activated when the conversation is not a
       //  conversation in a tab AND there's only one message in the conversation,
       //  i.e. the currently selected message
       await browser.conversations
-        .markSelectedAsJunk(action.isJunk)
+        .markSelectedAsJunk(getState().summary.tabId, action.isJunk)
         .catch(console.error);
       dispatch(messagesSlice.actions.msgSetIsJunk(action));
     };
